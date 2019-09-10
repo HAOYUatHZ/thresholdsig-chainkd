@@ -36,9 +36,8 @@ mod tests {
             .map(|i| Keys::phase1_create(key_gen_parties_points_vec[i]))
             .collect::<Vec<Keys>>();
 
-            // TODO: bigInt from string
-            let a_string = String::from("12");
-            let a: BigInt = str::parse(&a_string).unwrap();
+            let a_string = String::from("12"); 
+            let a = BigInt::from_str_radix(&a_string, 16).unwrap();
             println!("{:?}", a);
     }
 
