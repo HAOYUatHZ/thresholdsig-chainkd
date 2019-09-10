@@ -36,6 +36,8 @@ mod tests {
             .map(|i| Keys::phase1_create(key_gen_parties_points_vec[i]))
             .collect::<Vec<Keys>>();
 
+            // TODO: bigInt from string
+
 
         // println!("{:?}", 1);
     }
