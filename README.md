@@ -8,3 +8,9 @@ Forked from https://github.com/KZen-networks/multi-party-eddsa
 + DKG from [Fast Multiparty Threshold ECDSA with Fast Trustless Setup](http://stevengoldfeder.com/papers/GG18.pdf)
 + https://chain.com/docs/1.2/protocol/specifications/chainkd
 + https://tools.ietf.org/html/rfc8032#section-5.1
+
+<!-- 
+
+cargo test -- --nocapture 
+
+-->
