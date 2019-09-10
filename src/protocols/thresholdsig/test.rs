@@ -16,6 +16,14 @@ mod tests {
     use curv::{FE, GE};
     use protocols::thresholdsig::*;
 
+
+    #[test]
+    #[allow(unused_doc_comments)]
+    fn my_test() {
+        println!("{:?}", 1);
+    }
+
+
     #[test]
     #[allow(unused_doc_comments)]
     fn test_t2_n4() {
