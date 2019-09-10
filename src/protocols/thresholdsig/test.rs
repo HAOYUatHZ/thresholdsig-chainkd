@@ -20,6 +20,23 @@ mod tests {
     #[test]
     #[allow(unused_doc_comments)]
     fn my_test() {
+        let t = 1;
+        let n = 2;
+        let key_gen_parties_index_vec: [usize; 2] = [0, 1];
+        let key_gen_parties_points_vec = (0..key_gen_parties_index_vec.len())
+            .map(|i| key_gen_parties_index_vec[i].clone() + 1)
+            .collect::<Vec<usize>>();
+
+        let parames = Parameters {
+            threshold: t,
+            share_count: n.clone(),
+        };
+        assert_eq!(key_gen_parties_points_vec.len(), n.clone());
+        let party_keys_vec = (0..n.clone())
+            .map(|i| Keys::phase1_create(key_gen_parties_points_vec[i]))
+            .collect::<Vec<Keys>>();
+
+
         println!("{:?}", 1);
     }
 
