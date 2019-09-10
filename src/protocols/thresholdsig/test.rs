@@ -37,10 +37,9 @@ mod tests {
             .collect::<Vec<Keys>>();
 
             // TODO: bigInt from string
-            // let a: BigInt = str::parse(&a_string).unwrap();
-
-
-        // println!("{:?}", 1);
+            let a_string = String::from("12");
+            let a: BigInt = str::parse(&a_string).unwrap();
+            println!("{:?}", a);
     }
 
 
