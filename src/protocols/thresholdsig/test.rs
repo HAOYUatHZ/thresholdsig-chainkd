@@ -20,6 +20,20 @@ mod tests {
     #[test]
     #[allow(unused_doc_comments)]
     fn my_test() {
+        let a_string = String::from("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"); 
+        let a = BigInt::from_str_radix(&a_string, 16).unwrap();
+        println!("edPrv: {:?}", a);
+
+        // keygen
+        // msg
+        // eph_keygen
+        // veriy local
+        // generate sig
+        // verify sig
+
+
+
+        /// this test assumes that in keygen we have n=2 parties and in signing we have 2 parties as well.
         let t = 1;
         let n = 2;
         let key_gen_parties_index_vec: [usize; 2] = [0, 1];
@@ -27,28 +41,38 @@ mod tests {
             .map(|i| key_gen_parties_index_vec[i].clone() + 1)
             .collect::<Vec<usize>>();
 
-        let parames = Parameters {
-            threshold: t,
-            share_count: n.clone(),
-        };
-        assert_eq!(key_gen_parties_points_vec.len(), n.clone());
-        let party_keys_vec = (0..n.clone())
-            .map(|i| Keys::phase1_create(key_gen_parties_points_vec[i]))
-            .collect::<Vec<Keys>>();
+        let (priv_keys_vec, priv_shared_keys_vec, Y, key_gen_vss_vec) =
+            keygen_t_n_parties(t.clone(), n.clone(), &key_gen_parties_points_vec);
+        let parties_index_vec: [usize; 2] = [0, 1];
+        let parties_points_vec = (0..parties_index_vec.len())
+            .map(|i| parties_index_vec[i].clone() + 1)
+            .collect::<Vec<usize>>();
 
-            let a_string = String::from("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"); 
-            let a = BigInt::from_str_radix(&a_string, 16).unwrap();
-            println!("edPrv: {:?}", a);
+        let message: [u8; 4] = [79, 77, 69, 82];
+        let (_eph_keys_vec, eph_shared_keys_vec, R, eph_vss_vec) = eph_keygen_t_n_parties(
+            t.clone(),
+            n.clone(),
+            &parties_points_vec,
+            &priv_keys_vec,
+            &message,
+        );
+        let local_sig_vec = (0..n.clone())
+            .map(|i| LocalSig::compute(&message, &eph_shared_keys_vec[i], &priv_shared_keys_vec[i]))
+            .collect::<Vec<LocalSig>>();
+        let verify_local_sig = LocalSig::verify_local_sigs(
+            &local_sig_vec,
+            &parties_index_vec,
+            &key_gen_vss_vec,
+            &eph_vss_vec,
+        );
 
-
-        // msg
-        // eph_keygen
-        // veriy local
-        // generate sig
-        // verify sig
+        assert!(verify_local_sig.is_ok());
+        let vss_sum_local_sigs = verify_local_sig.unwrap();
+        let signature =
+            Signature::generate(&vss_sum_local_sigs, &local_sig_vec, &parties_index_vec, R);
+        let verify_sig = signature.verify(&message, &Y);
+        assert!(verify_sig.is_ok());
     }
-
-
 
     #[test]
     #[allow(unused_doc_comments)]
