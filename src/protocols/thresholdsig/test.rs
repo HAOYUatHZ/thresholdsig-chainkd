@@ -246,6 +246,77 @@ mod tests {
         (party_keys_vec, shared_keys_vec, y_sum, vss_scheme_vec)
     }
 
+    pub fn key_recover_t_n_parties(
+        t: usize,
+        n: usize,
+        parties: &[usize],
+    ) -> (Vec<Keys>, Vec<SharedKeys>, GE, Vec<VerifiableSS>) {
+        let parames = Parameters {
+            threshold: t,
+            share_count: n.clone(),
+        };
+        assert_eq!(parties.len(), n.clone());
+        let party_keys_vec = (0..n.clone())
+            .map(|i| Keys::phase1_create(parties[i]))
+            .collect::<Vec<Keys>>();
+
+        let mut bc1_vec = Vec::new();
+        let mut blind_vec = Vec::new();
+        for i in 0..n.clone() {
+            let (bc1, blind) = party_keys_vec[i].phase1_broadcast();
+            bc1_vec.push(bc1);
+            blind_vec.push(blind);
+        }
+
+        let y_vec = (0..n.clone())
+            .map(|i| party_keys_vec[i].y_i.clone())
+            .collect::<Vec<GE>>();
+        let mut y_vec_iter = y_vec.iter();
+        let head = y_vec_iter.next().unwrap();
+        let tail = y_vec_iter;
+        let y_sum = tail.fold(head.clone(), |acc, x| acc + x);
+        let mut vss_scheme_vec = Vec::new();
+        let mut secret_shares_vec = Vec::new();
+        let mut index_vec = Vec::new();
+        for i in 0..n.clone() {
+            let (vss_scheme, secret_shares, index) = party_keys_vec[i]
+                .phase1_verify_com_phase2_distribute(
+                    &parames, &blind_vec, &y_vec, &bc1_vec, parties,
+                )
+                .expect("invalid key");
+            vss_scheme_vec.push(vss_scheme);
+            secret_shares_vec.push(secret_shares);
+            index_vec.push(index);
+        }
+
+        let party_shares = (0..n.clone())
+            .map(|i| {
+                (0..n.clone())
+                    .map(|j| {
+                        let vec_j = &secret_shares_vec[j];
+                        vec_j[i].clone()
+                    })
+                    .collect::<Vec<FE>>()
+            })
+            .collect::<Vec<Vec<FE>>>();
+
+        let mut shared_keys_vec = Vec::new();
+        for i in 0..n.clone() {
+            let shared_keys = party_keys_vec[i]
+                .phase2_verify_vss_construct_keypair(
+                    &parames,
+                    &y_vec,
+                    &party_shares[i],
+                    &vss_scheme_vec,
+                    &index_vec[i],
+                )
+                .expect("invalid vss");
+            shared_keys_vec.push(shared_keys);
+        }
+
+        (party_keys_vec, shared_keys_vec, y_sum, vss_scheme_vec)
+    }
+
     pub fn eph_keygen_t_n_parties(
         t: usize, // system threshold
         n: usize, // number of signers
