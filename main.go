@@ -1,11 +1,13 @@
 package main
 
 import (
-	// "encoding/hex"
+	"crypto/cipher"
+	"encoding/hex"
 	"fmt"
 
 	"github.com/vapor/crypto/ed25519"
 	"github.com/vapor/crypto/ed25519/chainkd"
+	kbed "go.dedis.ch/kyber/sign/eddsa"
 )
 
 func main() {
@@ -28,6 +30,7 @@ func main() {
 		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
 		0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
 	}
+
 	edPrv := ed25519.NewKeyFromSeed(seed)
 	fmt.Println("edPrv", edPrv)
 	fmt.Println("edPub", edPrv.Public())
@@ -36,4 +39,39 @@ func main() {
 	fmt.Println("kdPrv.XPub", kdPrv.XPub())
 	fmt.Println("kdPrv.XPub.PublicKey", kdPrv.XPub().PublicKey())
 	fmt.Println("kdPrv.ExpandedPrivateKey.Public", kdPrv.ExpandedPrivateKey().Public())
+
+	s := "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8"
+	ss, err := hex.DecodeString(s)
+	if err != nil {
+		fmt.Println("err", err)
+	}
+
+	stream := ConstantStream(ss)
+	edDSA := kbed.NewEdDSA(stream)
+	// marshalled, err := edDSA.MarshalBinary()
+	fmt.Println(edDSA.Secret)
+	fmt.Println(edDSA.Public)
+	// fmt.Println(edDSA)
+	// fmt.Println(edDSA)
+
+	// unmarshalled := &EdDSA{}
+	// err = unmarshalled.UnmarshalBinary(marshalled)
+	// assert.Nil(t, err)
+	// assert.Equal(t, edDSA, unmarshalled)
+
+}
+
+// ConstantStream is a cipher.Stream which always returns
+// the same value.
+func ConstantStream(buff []byte) cipher.Stream {
+	return &constantStream{buff}
+}
+
+type constantStream struct {
+	seed []byte
+}
+
+// XORKexStream implements the cipher.Stream interface
+func (cs *constantStream) XORKeyStream(dst, src []byte) {
+	copy(dst, cs.seed)
 }

@@ -20,9 +20,12 @@ mod tests {
     #[test]
     #[allow(unused_doc_comments)]
     fn my_test() {
-        let a_string = String::from("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"); 
-        let a = BigInt::from_str_radix(&a_string, 16).unwrap();
-        println!("edPrv: {:?}", a);
+        // let s_str = String::from("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"); 
+        // let s_int = BigInt::from_str_radix(&s_str, 16).unwrap();
+        // let s_int = BigInt::from_hex("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
+        let s_int = BigInt::from_hex("aa9c2b77fe059cde7bbc67a4f30410d89c6d1440dede12e6a125f1841fff8e0f");
+        println!("edPrv: {:?}", s_int);
+        println!("edPrv: {:?}", s_int.to_str_radix(16));
 
         // keygen
         // msg
@@ -42,7 +45,7 @@ mod tests {
             .collect::<Vec<usize>>();
 
         let (priv_keys_vec, priv_shared_keys_vec, Y, key_gen_vss_vec) =
-            key_recover_t_n_parties(t.clone(), n.clone(), &key_gen_parties_points_vec);
+            key_recover_t_n_parties(t.clone(), n.clone(), &s_int, &key_gen_parties_points_vec);
         let parties_index_vec: [usize; 2] = [0, 1];
         let parties_points_vec = (0..parties_index_vec.len())
             .map(|i| parties_index_vec[i].clone() + 1)
@@ -70,6 +73,10 @@ mod tests {
         let vss_sum_local_sigs = verify_local_sig.unwrap();
         let signature =
             Signature::generate(&vss_sum_local_sigs, &local_sig_vec, &parties_index_vec, R);
+
+        println!("Y: {:?}", Y.bytes_compressed_to_big_int().to_str_radix(16));
+        println!("sig: {:?}", signature.R.bytes_compressed_to_big_int().to_str_radix(16));
+
         let verify_sig = signature.verify(&message, &Y);
         assert!(verify_sig.is_ok());
     }
@@ -249,6 +256,7 @@ mod tests {
     pub fn key_recover_t_n_parties(
         t: usize,
         n: usize,
+        secret: &BigInt,
         parties: &[usize],
     ) -> (Vec<Keys>, Vec<SharedKeys>, GE, Vec<VerifiableSS>) {
         let parames = Parameters {
@@ -257,7 +265,7 @@ mod tests {
         };
         assert_eq!(parties.len(), n.clone());
         let party_keys_vec = (0..n.clone())
-            .map(|i| Keys::phase1_create(parties[i]))
+            .map(|i| Keys::phase1_create_from_private_key(parties[i], secret))
             .collect::<Vec<Keys>>();
 
         let mut bc1_vec = Vec::new();
