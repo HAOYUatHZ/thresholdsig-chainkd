@@ -42,7 +42,7 @@ mod tests {
             .collect::<Vec<usize>>();
 
         let (priv_keys_vec, priv_shared_keys_vec, Y, key_gen_vss_vec) =
-            keygen_t_n_parties(t.clone(), n.clone(), &key_gen_parties_points_vec);
+            key_recover_t_n_parties(t.clone(), n.clone(), &key_gen_parties_points_vec);
         let parties_index_vec: [usize; 2] = [0, 1];
         let parties_points_vec = (0..parties_index_vec.len())
             .map(|i| parties_index_vec[i].clone() + 1)
