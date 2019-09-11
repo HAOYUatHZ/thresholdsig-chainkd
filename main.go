@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/hex"
+	// "encoding/hex"
 	"fmt"
 
 	"github.com/vapor/crypto/ed25519"

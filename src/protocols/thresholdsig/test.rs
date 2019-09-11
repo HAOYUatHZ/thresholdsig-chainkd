@@ -36,10 +36,9 @@ mod tests {
             .map(|i| Keys::phase1_create(key_gen_parties_points_vec[i]))
             .collect::<Vec<Keys>>();
 
-            let a_string = String::from("f2767279cd01ed8793808e0542a18958e1a2f3a6b6fe5328ec79596a022bc6f0"); 
-            // let a_string = String::from("f2767279cd01ed8793808e0542a18958e1a2f3a6b6fe5328ec79596a022bc6f085951a98a631917563f86bb91db9159dd2969ff9d690fc12b250baff2b6f6a1d"); 
+            let a_string = String::from("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"); 
             let a = BigInt::from_str_radix(&a_string, 16).unwrap();
-            println!("{:?}", a);
+            println!("edPrv{:?}", a);
     }
 
 
